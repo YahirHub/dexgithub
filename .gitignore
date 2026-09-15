@@ -1,0 +1,17 @@
+# Build
+/bin/
+/dist/
+*.test
+*.out
+
+# Local credentials and runtime state
+/.github/
+*.pem
+*.key
+.env
+.env.*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
