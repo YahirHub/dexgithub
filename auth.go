@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -213,5 +212,3 @@ func (s *Service) refreshUserToken(ctx context.Context, current UserToken) (User
 func (s *Service) LogoutGitHub() error {
 	return s.store.DeleteUserToken()
 }
-
-func secondsString(v int64) string { return strconv.FormatInt(v, 10) }
