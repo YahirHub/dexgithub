@@ -178,6 +178,10 @@ func TestManifestFormAndCompleteManifest(t *testing.T) {
 	if perms["contents"] != "read" {
 		t.Fatalf("permisos inesperados: %#v", perms)
 	}
+	events, ok := manifest["default_events"].([]any)
+	if !ok || len(events) != 0 {
+		t.Fatalf("default_events debe serializarse como arreglo vacío, obtuvo %#v", manifest["default_events"])
+	}
 
 	credentials, err := service.CompleteManifest(context.Background(), "code-123")
 	if err != nil {

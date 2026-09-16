@@ -86,6 +86,10 @@ func (s *Service) ManifestForm(options ManifestOptions) (ManifestForm, error) {
 			return ManifestForm{}, fmt.Errorf("nivel inválido para permiso %q", name)
 		}
 	}
+	events := options.Events
+	if events == nil {
+		events = []string{}
+	}
 	manifest := map[string]any{
 		"url":                      options.HomepageURL,
 		"redirect_url":             options.RedirectURL,
@@ -93,7 +97,7 @@ func (s *Service) ManifestForm(options ManifestOptions) (ManifestForm, error) {
 		"description":              options.Description,
 		"public":                   false,
 		"default_permissions":      permissions,
-		"default_events":           options.Events,
+		"default_events":           events,
 		"request_oauth_on_install": options.RequestOAuth,
 	}
 	if strings.TrimSpace(options.Name) != "" {
