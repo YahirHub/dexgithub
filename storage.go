@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -28,7 +29,7 @@ type Store interface {
 	SaveRegistry([]RepositoryRecord) error
 }
 
-// FileStore stores state under <root>/.dexgithub using root-only permissions.
+// FileStore stores state in one private directory using root-only permissions.
 // It intentionally does not encrypt at rest: on a single-host root daemon the
 // decryption key would live on the same host. Callers that have a vault/KMS can
 // inject another Store implementation.
@@ -41,7 +42,16 @@ func NewFileStore(root string) *FileStore {
 	if root == "" {
 		root = DefaultRootDir
 	}
-	return &FileStore{root: filepath.Join(filepath.Clean(root), ".dexgithub")}
+	return NewFileStoreAt(filepath.Join(filepath.Clean(root), ".dexgithub"))
+}
+
+// NewFileStoreAt stores DexGitHub state exactly in dir. This lets a consumer
+// define its own private layout without inheriting the legacy .dexgithub suffix.
+func NewFileStoreAt(dir string) *FileStore {
+	if strings.TrimSpace(dir) == "" {
+		dir = filepath.Join(DefaultRootDir, ".dexgithub")
+	}
+	return &FileStore{root: filepath.Clean(dir)}
 }
 
 func (s *FileStore) LoadApp() (AppCredentials, error) {

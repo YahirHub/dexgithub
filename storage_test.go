@@ -75,3 +75,45 @@ func TestVerifyWebhookSignature(t *testing.T) {
 		t.Fatal("firma inválida aceptada")
 	}
 }
+
+func TestFileStoreAtUsesExactDirectory(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("permisos POSIX")
+	}
+	dir := filepath.Join(t.TempDir(), ".dex", "dexgithub")
+	store := NewFileStoreAt(dir)
+	if err := store.SaveSettings(Settings{CloneRoot: filepath.Join(t.TempDir(), "repos")}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "settings.json")); err != nil {
+		t.Fatalf("StateDir exacto no contiene settings.json: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, ".dexgithub")); !os.IsNotExist(err) {
+		t.Fatalf("NewFileStoreAt no debe añadir un subdirectorio .dexgithub, err=%v", err)
+	}
+	info, err := os.Stat(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if info.Mode().Perm() != 0o700 {
+		t.Fatalf("state dir mode=%o", info.Mode().Perm())
+	}
+}
+
+func TestConfigStateDirUsesExactDirectory(t *testing.T) {
+	stateDir := filepath.Join(t.TempDir(), ".dex", "dexgithub")
+	service, err := New(Config{RootDir: t.TempDir(), StateDir: stateDir, CloneRoot: filepath.Join(t.TempDir(), "repos")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg := service.Config()
+	if cfg.StateDir != filepath.Clean(stateDir) {
+		t.Fatalf("StateDir=%q; esperaba %q", cfg.StateDir, filepath.Clean(stateDir))
+	}
+	if err := service.store.SaveSettings(Settings{CloneRoot: cfg.CloneRoot}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(stateDir, "settings.json")); err != nil {
+		t.Fatalf("estado no se guardó en StateDir exacto: %v", err)
+	}
+}

@@ -70,11 +70,14 @@ Con configuración por defecto:
 
 ```text
 RootDir:    /root/.github
+StateDir:   /root/.github/.dexgithub
 CloneRoot:  /root/.github/repos
 GitHub web: https://github.com
 GitHub API: https://api.github.com
 API:        2026-03-10
 ```
+
+`StateDir` es opcional. Si se omite conserva el comportamiento histórico `RootDir/.dexgithub`; un consumidor puede definir una ruta exacta para integrar el estado privado en su propio layout. Por ejemplo, un panel puede usar `RootDir=/root/.dex`, `StateDir=/root/.dex/dexgithub` y `CloneRoot=/root/.dex/repos`.
 
 ## Flujo recomendado para un panel web
 

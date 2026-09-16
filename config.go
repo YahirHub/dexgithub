@@ -18,6 +18,7 @@ const (
 // Config controls GitHub API access, local persistence and Git execution.
 type Config struct {
 	RootDir        string
+	StateDir       string
 	CloneRoot      string
 	WebBaseURL     string
 	APIBaseURL     string
@@ -39,6 +40,15 @@ func (c Config) normalized() (Config, error) {
 		return Config{}, err
 	}
 	c.RootDir = filepath.Clean(root)
+
+	if strings.TrimSpace(c.StateDir) == "" {
+		c.StateDir = filepath.Join(c.RootDir, ".dexgithub")
+	}
+	stateDir, err := filepath.Abs(c.StateDir)
+	if err != nil {
+		return Config{}, err
+	}
+	c.StateDir = filepath.Clean(stateDir)
 
 	if strings.TrimSpace(c.CloneRoot) == "" {
 		c.CloneRoot = filepath.Join(c.RootDir, "repos")
@@ -86,7 +96,7 @@ func (c Config) normalized() (Config, error) {
 		c.HTTPClient = &http.Client{Timeout: c.RequestTimeout}
 	}
 	if c.Store == nil {
-		c.Store = NewFileStore(c.RootDir)
+		c.Store = NewFileStoreAt(c.StateDir)
 	}
 	return c, nil
 }
