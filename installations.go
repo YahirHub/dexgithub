@@ -212,6 +212,9 @@ func (s *Service) listRepositories(ctx context.Context, endpoint, bearer string,
 				HTMLURL       string          `json:"html_url"`
 				Archived      bool            `json:"archived"`
 				Disabled      bool            `json:"disabled"`
+				CreatedAt     time.Time       `json:"created_at"`
+				UpdatedAt     time.Time       `json:"updated_at"`
+				PushedAt      time.Time       `json:"pushed_at"`
 				Permissions   map[string]bool `json:"permissions"`
 				Owner         struct {
 					Login string `json:"login"`
@@ -226,8 +229,9 @@ func (s *Service) listRepositories(ctx context.Context, endpoint, bearer string,
 				ID: item.ID, NodeID: item.NodeID, Name: item.Name, FullName: item.FullName,
 				Owner: item.Owner.Login, Private: item.Private, DefaultBranch: item.DefaultBranch,
 				CloneURL: item.CloneURL, SSHURL: item.SSHURL, HTMLURL: item.HTMLURL,
-				Archived: item.Archived, Disabled: item.Disabled, Permissions: item.Permissions,
-				InstallationID: installationID,
+				Archived: item.Archived, Disabled: item.Disabled,
+				CreatedAt: item.CreatedAt, UpdatedAt: item.UpdatedAt, PushedAt: item.PushedAt,
+				Permissions: item.Permissions, InstallationID: installationID,
 			})
 		}
 		if len(response.Repositories) < 100 {

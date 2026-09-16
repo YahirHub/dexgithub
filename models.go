@@ -62,6 +62,9 @@ type Repository struct {
 	HTMLURL        string          `json:"html_url,omitempty"`
 	Archived       bool            `json:"archived,omitempty"`
 	Disabled       bool            `json:"disabled,omitempty"`
+	CreatedAt      time.Time       `json:"created_at,omitempty"`
+	UpdatedAt      time.Time       `json:"updated_at,omitempty"`
+	PushedAt       time.Time       `json:"pushed_at,omitempty"`
 	Permissions    map[string]bool `json:"permissions,omitempty"`
 	InstallationID int64           `json:"installation_id,omitempty"`
 }

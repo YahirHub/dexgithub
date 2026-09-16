@@ -215,7 +215,7 @@ func TestUserOAuthInstallationsRepositoriesAndInstallationToken(t *testing.T) {
 		case "/user/installations":
 			_ = json.NewEncoder(w).Encode(map[string]any{"total_count": 1, "installations": []any{map[string]any{"id": 101, "repository_selection": "selected", "account": map[string]any{"id": 9, "login": "octo", "type": "User"}, "permissions": map[string]any{"contents": "read"}}}})
 		case "/user/installations/101/repositories":
-			_ = json.NewEncoder(w).Encode(map[string]any{"total_count": 1, "repositories": []any{map[string]any{"id": 501, "name": "private-repo", "full_name": "octo/private-repo", "private": true, "default_branch": "main", "clone_url": "https://github.com/octo/private-repo.git", "owner": map[string]any{"login": "octo"}}}})
+			_ = json.NewEncoder(w).Encode(map[string]any{"total_count": 1, "repositories": []any{map[string]any{"id": 501, "name": "private-repo", "full_name": "octo/private-repo", "private": true, "default_branch": "main", "clone_url": "https://github.com/octo/private-repo.git", "created_at": "2026-09-10T10:00:00Z", "updated_at": "2026-09-15T11:30:00Z", "pushed_at": "2026-09-16T09:45:00Z", "owner": map[string]any{"login": "octo"}}}})
 		case "/app/installations/101/access_tokens":
 			installationTokenCalls++
 			if !strings.HasPrefix(r.Header.Get("Authorization"), "Bearer ey") {
@@ -266,6 +266,12 @@ func TestUserOAuthInstallationsRepositoriesAndInstallationToken(t *testing.T) {
 	}
 	if len(repos) != 1 || repos[0].ID != 501 || !repos[0].Private {
 		t.Fatalf("repos: %+v", repos)
+	}
+	if got := repos[0].PushedAt.UTC().Format(time.RFC3339); got != "2026-09-16T09:45:00Z" {
+		t.Fatalf("pushed_at no se mapeó: %q", got)
+	}
+	if repos[0].UpdatedAt.IsZero() || repos[0].CreatedAt.IsZero() {
+		t.Fatalf("timestamps de repositorio incompletos: %+v", repos[0])
 	}
 
 	if _, err := service.RepositoriesForInstallation(context.Background(), 101); err != nil {

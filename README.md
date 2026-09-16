@@ -150,7 +150,7 @@ installations, err := svc.UserInstallations(ctx)
 repos, err := svc.AccessibleRepositories(ctx)
 ```
 
-Cada `Repository` incluye `InstallationID`, necesario para clonar repos privados sin PAT.
+Cada `Repository` incluye `InstallationID`, necesario para clonar repos privados sin PAT, y conserva `CreatedAt`, `UpdatedAt` y `PushedAt` cuando GitHub los entrega para poder ordenar por actividad real sin llamadas adicionales.
 
 Si GitHub redirige una instalación con `installation_id`, no confiar directamente en ese query param. Verificarlo:
 
