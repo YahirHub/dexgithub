@@ -45,6 +45,8 @@ Los installation tokens no se escriben a disco.
 - `git` disponible en el host para operaciones de repositorios.
 - Acceso HTTPS a GitHub/GitHub Enterprise.
 
+Los callbacks Manifest/OAuth pueden usar HTTP únicamente en hosts locales/LAN confiables (loopback, IP privadas/link-local, `.local` o `.home.arpa`), por ejemplo `http://dex.local:9090`. Para una URL pública se exige HTTPS. Los webhooks siguen requiriendo HTTPS porque deben ser alcanzables de forma segura desde GitHub.
+
 No usa CGO ni una librería Git en Go.
 
 ## Instalación

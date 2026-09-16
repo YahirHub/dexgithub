@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -179,7 +180,7 @@ func (s *Service) CompleteManifest(ctx context.Context, code string) (AppCredent
 	return credentials, nil
 }
 
-func requireHTTPSURL(raw string, allowLoopbackHTTP bool) error {
+func requireHTTPSURL(raw string, allowLocalHTTP bool) error {
 	u, err := url.Parse(strings.TrimSpace(raw))
 	if err != nil {
 		return err
@@ -190,8 +191,19 @@ func requireHTTPSURL(raw string, allowLoopbackHTTP bool) error {
 	if u.Scheme == "https" {
 		return nil
 	}
-	if allowLoopbackHTTP && u.Scheme == "http" && isLoopbackHost(u.Hostname()) {
+	if allowLocalHTTP && u.Scheme == "http" && isTrustedLocalHTTPHost(u.Hostname()) {
 		return nil
 	}
-	return errors.New("se requiere HTTPS salvo loopback permitido")
+	return errors.New("se requiere HTTPS salvo host local/LAN permitido")
+}
+
+func isTrustedLocalHTTPHost(host string) bool {
+	host = strings.TrimSpace(strings.ToLower(host))
+	if isLoopbackHost(host) {
+		return true
+	}
+	if ip := net.ParseIP(host); ip != nil {
+		return ip.IsPrivate() || ip.IsLinkLocalUnicast()
+	}
+	return strings.HasSuffix(host, ".local") || strings.HasSuffix(host, ".home.arpa")
 }

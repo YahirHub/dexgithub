@@ -98,6 +98,47 @@ func testPrivateKeyPEM(t *testing.T) string {
 	return string(pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)}))
 }
 
+func TestManifestFormAllowsTrustedLANHTTP(t *testing.T) {
+	service, err := New(Config{RootDir: t.TempDir(), CloneRoot: filepath.Join(t.TempDir(), "repos")})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, raw := range []string{
+		"http://localhost:9090/callback",
+		"http://127.0.0.1:9090/callback",
+		"http://192.168.1.20:9090/callback",
+		"http://dex.local:9090/callback",
+		"http://dex.home.arpa:9090/callback",
+	} {
+		if err := requireHTTPSURL(raw, true); err != nil {
+			t.Fatalf("URL LAN válida %q fue rechazada: %v", raw, err)
+		}
+	}
+	for _, raw := range []string{
+		"http://example.com/callback",
+		"ftp://dex.local/callback",
+	} {
+		if err := requireHTTPSURL(raw, true); err == nil {
+			t.Fatalf("URL insegura %q fue aceptada", raw)
+		}
+	}
+	if _, err := service.ManifestForm(ManifestOptions{
+		HomepageURL:  "http://dex.local:9090",
+		RedirectURL:  "http://dex.local:9090/github/manifest/callback",
+		CallbackURLs: []string{"http://dex.local:9090/github/oauth/callback"},
+		State:        "state-lan",
+	}); err != nil {
+		t.Fatalf("manifest con dex.local debía ser válido: %v", err)
+	}
+	if _, err := service.ManifestForm(ManifestOptions{
+		HomepageURL: "http://example.com",
+		RedirectURL: "http://example.com/github/manifest/callback",
+		State:       "state-public-http",
+	}); err == nil {
+		t.Fatal("manifest HTTP público debía rechazarse")
+	}
+}
+
 func TestManifestFormAndCompleteManifest(t *testing.T) {
 	pemKey := testPrivateKeyPEM(t)
 	var sawVersion bool
