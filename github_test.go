@@ -162,7 +162,7 @@ func TestManifestFormAndCompleteManifest(t *testing.T) {
 	}
 	form, err := service.ManifestForm(ManifestOptions{
 		Name: "Dex GitHub", HomepageURL: "https://dex.example", RedirectURL: "https://dex.example/github/manifest/callback",
-		CallbackURLs: []string{"https://dex.example/github/oauth/callback"}, RequestOAuth: true, State: "state-123",
+		CallbackURLs: []string{"https://dex.example/github/oauth/callback"}, SetupURL: "https://dex.example/github/setup/callback", State: "state-123",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -181,6 +181,9 @@ func TestManifestFormAndCompleteManifest(t *testing.T) {
 	events, ok := manifest["default_events"].([]any)
 	if !ok || len(events) != 0 {
 		t.Fatalf("default_events debe serializarse como arreglo vacío, obtuvo %#v", manifest["default_events"])
+	}
+	if manifest["setup_url"] != "https://dex.example/github/setup/callback" || manifest["setup_on_update"] != false {
+		t.Fatalf("setup URL inesperada: setup_url=%#v setup_on_update=%#v", manifest["setup_url"], manifest["setup_on_update"])
 	}
 
 	credentials, err := service.CompleteManifest(context.Background(), "code-123")

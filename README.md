@@ -106,6 +106,15 @@ GitHub devuelve `code` + `state` a `RedirectURL`. El panel verifica el `state` d
 credentials, err := svc.CompleteManifest(ctx, code)
 ```
 
+Si el panel quiere que GitHub vuelva automáticamente después de que el usuario instale la App y elija repositorios, puede incluir una `SetupURL` en el Manifest:
+
+```go
+SetupURL:      "https://dex.example.com/github/setup/callback",
+SetupOnUpdate: false,
+```
+
+`SetupURL` no se combina con `RequestOAuth`; la autorización OAuth del usuario puede iniciarse después como un paso separado.
+
 ### 2. Instalar la GitHub App
 
 ```go

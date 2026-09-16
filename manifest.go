@@ -19,6 +19,8 @@ type ManifestOptions struct {
 	HomepageURL   string
 	RedirectURL   string
 	CallbackURLs  []string
+	SetupURL      string
+	SetupOnUpdate bool
 	Description   string
 	Owner         string // empty = personal account; otherwise organization login
 	RequestOAuth  bool
@@ -58,6 +60,14 @@ func (s *Service) ManifestForm(options ManifestOptions) (ManifestForm, error) {
 	for _, callback := range options.CallbackURLs {
 		if err := requireHTTPSURL(callback, true); err != nil {
 			return ManifestForm{}, fmt.Errorf("callback URL inválida: %w", err)
+		}
+	}
+	if options.SetupURL != "" {
+		if options.RequestOAuth {
+			return ManifestForm{}, errors.New("SetupURL no puede combinarse con RequestOAuth")
+		}
+		if err := requireHTTPSURL(options.SetupURL, true); err != nil {
+			return ManifestForm{}, fmt.Errorf("SetupURL inválida: %w", err)
 		}
 	}
 	if options.WebhookURL != "" {
@@ -102,6 +112,10 @@ func (s *Service) ManifestForm(options ManifestOptions) (ManifestForm, error) {
 	}
 	if strings.TrimSpace(options.Name) != "" {
 		manifest["name"] = strings.TrimSpace(options.Name)
+	}
+	if options.SetupURL != "" {
+		manifest["setup_url"] = options.SetupURL
+		manifest["setup_on_update"] = options.SetupOnUpdate
 	}
 	if options.WebhookURL != "" {
 		manifest["hook_attributes"] = map[string]any{
